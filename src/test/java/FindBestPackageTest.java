@@ -1,4 +1,3 @@
-import com.google.common.io.Resources;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +15,14 @@ public class FindBestPackageTest {
 
     @Test
     public void testOk() {
-        String path = getPath(Resources.getResource("sampleInput.txt"));
+        String path = getPath(getClass().getResource("sampleInput.txt"));
         String[] args = {path};
         FindBestPackage.main(args);
     }
 
     @Test
     public void testWithErrors() {
-        String path = getPath(Resources.getResource("sampleInvalidInput.txt"));
+        String path = getPath(getClass().getResource("sampleInvalidInput.txt"));
         String[] args = {path};
         FindBestPackage.main(args);
     }
