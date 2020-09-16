@@ -152,7 +152,7 @@ public class PackageSpecification {
      */
     public Optional<Package> findBestPackage() {
         // generate all subsets of the given set of products
-        // as the max number of products is <= 15 the Quava Sets.powerSet algorithm can be used
+        // as the max number of products is <= 15 the Guava Sets.powerSet algorithm can be used
         Set<Set<Product>> allPackages = Sets.powerSet(products);
         // find the best subset
         return allPackages.stream()
