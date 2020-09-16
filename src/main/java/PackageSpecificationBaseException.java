@@ -1,5 +1,5 @@
 public class PackageSpecificationBaseException extends RuntimeException {
-    protected int lineNumber;
+    protected final int lineNumber;
 
     public PackageSpecificationBaseException(String message, int lineNumber) {
         super(message);

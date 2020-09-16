@@ -7,10 +7,10 @@ import java.util.Set;
  * Encapsulates a package with a set of products and their total weight and price functions.
  */
 public class Package {
-    private Set<Product> products;
+    private final Set<Product> products;
 
     // Best package comparator
-    public static Comparator<Package> BEST_PACKAGE_COMPARATOR =
+    public static final Comparator<Package> BEST_PACKAGE_COMPARATOR =
         // compare first by price
         Comparator.comparingDouble(Package::getPrice)
             .thenComparing(

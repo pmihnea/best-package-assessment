@@ -5,8 +5,9 @@ import java.util.stream.Collectors;
 /**
  * Encapsulates an optional package that is transformed into the desired output text line.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OutputLine {
-    private Optional<Package> optionalPackage;
+    private final Optional<Package> optionalPackage;
 
     @Override
     public String toString() {

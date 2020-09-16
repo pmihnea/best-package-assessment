@@ -5,9 +5,9 @@ import com.google.common.base.Objects;
  * Encapsulates a product with a number, weight and price.
  */
 public class Product {
-    private Integer number;
-    private Double weight;
-    private Double price;
+    private final Integer number;
+    private final Double weight;
+    private final Double price;
 
     public Product(Integer number, Double weight, Double price) {
         this.number = number;
