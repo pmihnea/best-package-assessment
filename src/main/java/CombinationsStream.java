@@ -1,8 +1,6 @@
 import com.google.common.base.Preconditions;
 
-import java.util.ArrayDeque;
 import java.util.BitSet;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterators;
@@ -60,15 +58,9 @@ public class CombinationsStream {
         return ns;
     }
 
-    private BitSet queue2BitSet(Deque<Integer> combination) {
-        BitSet bitSet = new BitSet(n);
-        combination.forEach(bitSet::set);
-        return bitSet;
-    }
-
     private Stream<BitSet> combinationsStreamIterative() {
         Iterator<BitSet> iterator = new Iterator<>() {
-            Deque<Integer> combination = new ArrayDeque<>(n);
+            BitSet combination = new BitSet(n);
             Integer last = -1;
             BitSet next = new BitSet(n); // empty combination
 
@@ -81,17 +73,22 @@ public class CombinationsStream {
                 // find the next combination
                 do {
                     if (last < n - 1) {
-                        if (canExtendCombination.apply(queue2BitSet(combination), last + 1)) {
+                        if (canExtendCombination.apply(combination, last + 1)) {
                             // extends the combination with a new element
-                            combination.offerLast(last = last + 1);
-                            next = queue2BitSet(combination);
+                            combination.set(last = last + 1);
+                            next = (BitSet) combination.clone();
                         } else {
                             last = last + 1;
                         }
                     } else {
                         // remove the elements from the combination until one has a valid successor
                         do {
-                            last = combination.pollLast();
+                            last = combination.previousSetBit(n-1);
+                            if(last < 0){
+                                last = null;
+                            }else {
+                                combination.clear(last);
+                            }
                         } while (last != null && last + 1 > n - 1);
                     }
                 } while (last != null && next == null);
