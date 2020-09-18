@@ -1,8 +1,14 @@
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayDeque;
 import java.util.BitSet;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Spliterators;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class CombinationsStream {
     private final int n;
@@ -15,15 +21,32 @@ public class CombinationsStream {
         this.canExtendCombination = canExtendCombination;
     }
 
-    public Stream<BitSet> toBitSetStream() {
-        return combinations(0);
+    public enum Strategy {
+        RECURSIVE, ITERATIVE
+    }
+    private Strategy strategy = Strategy.ITERATIVE;
+
+    public Strategy getStrategy() {
+        return strategy;
     }
 
-    private Stream<BitSet> combinations(int start) {
+    public void setStrategy(Strategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public Stream<BitSet> toBitSetStream() {
+        switch (getStrategy()){
+            case ITERATIVE: return combinationsStreamIterative();
+            case RECURSIVE: return combinationsStreamRecursive(0);
+            default: throw new IllegalStateException("Invalid CombinationsStream Strategy: " + getStrategy());
+        }
+    }
+
+    private Stream<BitSet> combinationsStreamRecursive(int start) {
         if (start >= n) {
             return Stream.of(new BitSet(n));
         }
-        return combinations(start + 1).flatMap(
+        return combinationsStreamRecursive(start + 1).flatMap(
             combination -> canExtendCombination.apply(combination, start)
                 ? Stream.of(combination, extendCombination(combination, start))
                 : Stream.of(combination)
@@ -37,4 +60,57 @@ public class CombinationsStream {
         return ns;
     }
 
+    private BitSet queue2BitSet(Deque<Integer> combination) {
+        BitSet bitSet = new BitSet(n);
+        combination.forEach(bitSet::set);
+        return bitSet;
+    }
+
+    private Stream<BitSet> combinationsStreamIterative() {
+        Iterator<BitSet> iterator = new Iterator<>() {
+            Deque<Integer> combination = new ArrayDeque<>(n);
+            Integer last = -1;
+            BitSet next = new BitSet(n); // empty combination
+
+            @Override
+            public boolean hasNext() {
+                if (next != null) {
+                    return true;
+                }
+
+                // find the next combination
+                do {
+                    if (last < n - 1) {
+                        if (canExtendCombination.apply(queue2BitSet(combination), last + 1)) {
+                            // extends the combination with a new element
+                            combination.offerLast(last = last + 1);
+                            next = queue2BitSet(combination);
+                        } else {
+                            last = last + 1;
+                        }
+                    } else {
+                        // remove the elements from the combination until one has a valid successor
+                        do {
+                            last = combination.pollLast();
+                        } while (last != null && last + 1 > n - 1);
+                    }
+                } while (last != null && next == null);
+
+                return next != null;
+            }
+
+            @Override
+            public BitSet next() {
+                if (hasNext()) {
+                    BitSet current = next;
+                    next = null;
+                    return current;
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+        };
+
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+    }
 }
