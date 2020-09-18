@@ -26,18 +26,14 @@ public class Package {
         this.products = products;
     }
 
-    public boolean hasValidWeight(Double weight) {
-        return getWeight() <= weight;
-    }
-
-    Double getPrice() {
+    public Double getPrice() {
         return products.stream()
             .map(Product::getPrice)
             .reduce(Double::sum)
             .orElse(0.0);
     }
 
-    Double getWeight() {
+    public Double getWeight() {
         return products.stream()
             .map(Product::getWeight)
             .reduce(Double::sum)

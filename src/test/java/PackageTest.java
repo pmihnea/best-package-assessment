@@ -2,7 +2,6 @@ import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackageTest {
@@ -43,7 +42,5 @@ public class PackageTest {
         ));
         assertEquals(40.0, aPackage.getPrice());
         assertEquals(19.0, aPackage.getWeight());
-        assertTrue(aPackage.hasValidWeight(50.0));
-        assertFalse(aPackage.hasValidWeight(15.0));
     }
 }

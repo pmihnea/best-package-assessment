@@ -1,5 +1,7 @@
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.Optional;
 import java.util.Set;
@@ -66,8 +68,9 @@ public class PackageSpecificationTest {
         );
     }
 
-    @Test
-    public  void testFindPackage1(){
+    @ParameterizedTest
+    @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
+    public  void testFindPackage1(PackageSpecification.FindBestPackageStrategy strategy){
         PackageSpecification packageSpecification = new PackageSpecification(81.0,
             new Product(1, 53.38, 45.0),
             new Product(2, 88.62, 98.0),
@@ -76,6 +79,7 @@ public class PackageSpecificationTest {
             new Product(5, 30.18, 9.0),
             new Product(6, 46.34, 48.0)
         );
+        packageSpecification.setFindBestPackageStrategy(strategy);
         Optional<Package> aPackage = packageSpecification.findBestPackage();
         assertTrue(aPackage.isPresent());
         Set<Product> expectedProducts = Sets.newHashSet(
@@ -84,19 +88,22 @@ public class PackageSpecificationTest {
         assertEquals(expectedProducts, aPackage.get().getProducts());
     }
 
-    @Test
-    public  void testFindPackage2(){
+    @ParameterizedTest
+    @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
+    public  void testFindPackage2(PackageSpecification.FindBestPackageStrategy strategy){
         PackageSpecification packageSpecification = new PackageSpecification(8.0,
             new Product(1, 15.3, 34.0)
         );
+        packageSpecification.setFindBestPackageStrategy(strategy);
         Optional<Package> aPackage = packageSpecification.findBestPackage();
         assertTrue(aPackage.isPresent());
         Set<Product> expectedProducts = Sets.newHashSet();
         assertEquals(expectedProducts, aPackage.get().getProducts());
     }
 
-    @Test
-    public  void testFindPackage3(){
+    @ParameterizedTest
+    @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
+    public  void testFindPackage3(PackageSpecification.FindBestPackageStrategy strategy){
         PackageSpecification packageSpecification = new PackageSpecification(75.0,
             new Product(1, 85.31, 29.0),
             new Product(2, 14.55, 74.0),
@@ -108,6 +115,7 @@ public class PackageSpecificationTest {
             new Product(8, 93.18, 35.0),
             new Product(9, 89.95, 78.0)
         );
+        packageSpecification.setFindBestPackageStrategy(strategy);
         Optional<Package> aPackage = packageSpecification.findBestPackage();
         assertTrue(aPackage.isPresent());
         Set<Product> expectedProducts = Sets.newHashSet(
@@ -117,8 +125,9 @@ public class PackageSpecificationTest {
         assertEquals(expectedProducts, aPackage.get().getProducts());
     }
 
-    @Test
-    public  void testFindPackage4(){
+    @ParameterizedTest
+    @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
+    public  void testFindPackage4(PackageSpecification.FindBestPackageStrategy strategy){
         PackageSpecification packageSpecification = new PackageSpecification(56.0,
             new Product(1, 90.72, 13.0),
             new Product(2, 33.80, 40.0),
@@ -130,6 +139,7 @@ public class PackageSpecificationTest {
             new Product(8, 19.36, 79.0),
             new Product(9, 6.76, 64.0)
         );
+        packageSpecification.setFindBestPackageStrategy(strategy);
         Optional<Package> aPackage = packageSpecification.findBestPackage();
         assertTrue(aPackage.isPresent());
         Set<Product> expectedProducts = Sets.newHashSet(

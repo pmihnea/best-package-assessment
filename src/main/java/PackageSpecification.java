@@ -145,19 +145,77 @@ public class PackageSpecification {
         return products;
     }
 
+    public enum FindBestPackageStrategy {
+        OPTIMIZED, BRUTE_FORCE
+    }
+
+    private FindBestPackageStrategy findBestPackageStrategy = FindBestPackageStrategy.OPTIMIZED;
+
+    public FindBestPackageStrategy getFindBestPackageStrategy() {
+        return findBestPackageStrategy;
+    }
+
+    public void setFindBestPackageStrategy(FindBestPackageStrategy findBestPackageStrategy) {
+        this.findBestPackageStrategy = findBestPackageStrategy;
+    }
+
     /**
      * Finds the best package based on the valid package specification.
      *
      * @return Optional.of(best package) or Optional.empty in case none is found
      */
     public Optional<Package> findBestPackage() {
+        switch (getFindBestPackageStrategy()) {
+            case OPTIMIZED:
+                return findBestPackageOptimized();
+            case BRUTE_FORCE:
+                return findBestPackageBruteForce();
+            default:
+                throw new IllegalStateException("Invalid FindBestPackageStrategy: " + getFindBestPackageStrategy());
+        }
+    }
+
+    /**
+     * Finds the best package by iterating through all possible packages and selecting the best one.
+     */
+    private Optional<Package> findBestPackageBruteForce() {
         // generate all subsets of the given set of products
         // as the max number of products is <= 15 the Guava Sets.powerSet algorithm can be used
         Set<Set<Product>> allPackages = Sets.powerSet(products);
         // find the best subset
         return allPackages.stream()
             .map(Package::new)
-            .filter(aPackage -> aPackage.hasValidWeight(maxWeight))
+            .filter(aPackage -> aPackage.getWeight() <= maxWeight)
+            .max(Package.BEST_PACKAGE_COMPARATOR);
+    }
+
+    /**
+     * Finds the best package by iterating through all possible packages and selecting the best one,
+     * but the iteration is optimized and does not iterate through the packages that already exceed the max weight
+     * and through those that are an extension of the former.
+     */
+    private Optional<Package> findBestPackageOptimized() {
+        Product[] productsArray = products.toArray(new Product[0]);
+        // Produces a stream of combinations of indexes of products
+        // with a condition that stops adding another product into a combination of products
+        // if that would exceed the max package weight
+        CombinationsStream combinationsStream = new CombinationsStream(productsArray.length,
+            (bitSet, i) -> {
+                Double productsTotalWeight = bitSet.stream()
+                    .mapToObj(index -> productsArray[index])
+                    .map(Product::getWeight)
+                    .reduce(Double::sum)
+                    .orElse(0.0);
+                return productsTotalWeight + productsArray[i].getWeight() <= maxWeight;
+            }
+        );
+        // The stream of combinations of indexes of products is transformed to a stream of Packages
+        // and then the best package is extracted
+        return combinationsStream.toBitSetStream()
+            .map(bitSet -> bitSet.stream()
+                .mapToObj(index -> productsArray[index])
+                .collect(Collectors.toSet()))
+            .map(Package::new)
             .max(Package.BEST_PACKAGE_COMPARATOR);
     }
 }
