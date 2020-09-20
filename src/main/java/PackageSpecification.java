@@ -2,6 +2,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import io.vavr.control.Try;
 
+import java.util.BitSet;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
@@ -146,7 +147,7 @@ public class PackageSpecification {
     }
 
     public enum FindBestPackageStrategy {
-        OPTIMIZED, BRUTE_FORCE
+        OPTIMIZED, BRUTE_FORCE, KNAPSACK
     }
 
     private FindBestPackageStrategy findBestPackageStrategy = FindBestPackageStrategy.OPTIMIZED;
@@ -170,6 +171,8 @@ public class PackageSpecification {
                 return findBestPackageOptimized();
             case BRUTE_FORCE:
                 return findBestPackageBruteForce();
+            case KNAPSACK:
+                return findBestPackageKnapsack();
             default:
                 throw new IllegalStateException("Invalid FindBestPackageStrategy: " + getFindBestPackageStrategy());
         }
@@ -217,5 +220,15 @@ public class PackageSpecification {
                 .collect(Collectors.toSet()))
             .map(Package::new)
             .max(Package.BEST_PACKAGE_COMPARATOR);
+    }
+
+    /**
+     * Finds the best package using the classical Knapsack algorithm.
+     */
+    private Optional<Package> findBestPackageKnapsack() {
+        Product[] productsArray = products.toArray(new Product[0]);
+        BitSet max = new Knapsack(productsArray).findMax(getMaxWeight());
+        Set<Product> packageProducts = max.stream().mapToObj(index -> productsArray[index]).collect(Collectors.toSet());
+        return Optional.of(new Package(packageProducts));
     }
 }
