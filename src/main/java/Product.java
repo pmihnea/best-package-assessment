@@ -5,25 +5,25 @@ import com.google.common.base.Objects;
  * Encapsulates a product with a number, weight and price.
  */
 public class Product {
-    private final Integer number;
-    private final Double weight;
-    private final Double price;
+    private final int number;
+    private final double weight;
+    private final double price;
 
-    public Product(Integer number, Double weight, Double price) {
+    public Product(int number, double weight, double price) {
         this.number = number;
         this.weight = weight;
         this.price = price;
     }
 
-    public Integer getNumber() {
+    public int getNumber() {
         return number;
     }
 
-    public Double getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return price;
     }
 
@@ -32,9 +32,9 @@ public class Product {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return Objects.equal(number, product.number) &&
-            Objects.equal(weight, product.weight) &&
-            Objects.equal(price, product.price);
+        return number == product.number &&
+            Double.compare(product.weight, weight) == 0 &&
+            Double.compare(product.price, price) == 0;
     }
 
     @Override

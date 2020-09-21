@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.BitSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class KnapsackTest {
@@ -13,14 +14,14 @@ public class KnapsackTest {
             new Product(3, 8.0, 25.0)
         };
         BitSet max = new Knapsack(products).findMax(32);
-        String result = max.stream().mapToObj(index -> products[index].getNumber().toString()).sorted().collect(Collectors.joining(","));
+        String result = max.stream().map(index -> products[index].getNumber()).sorted().mapToObj(Objects::toString).collect(Collectors.joining(","));
         Assertions.assertEquals("2,3", result);
     }
     @Test
     public void testFindMaxEmptyProducts(){
         Product[] products = {};
         BitSet max = new Knapsack(products).findMax(32);
-        String result = max.stream().mapToObj(index -> products[index].getNumber().toString()).sorted().collect(Collectors.joining(","));
+        String result = max.stream().map(index -> products[index].getNumber()).sorted().mapToObj(Objects::toString).collect(Collectors.joining(","));
         Assertions.assertEquals("", result);
     }
 }
