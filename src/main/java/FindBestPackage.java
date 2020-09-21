@@ -14,8 +14,7 @@ import java.util.stream.Stream;
  * <li>it reads the file line by line
  * <li>for each line <ul>
  * <li>it parses and validates the package specification resulting a set of products with a max total weight
- * <li>it computes all the subsets of the set of products
- * <li>it finds the best subset and builds a package with it
+ * <li>it finds the best package
  * <li>it prints the resulting package on one line
  * </ul>
  * </ul>
