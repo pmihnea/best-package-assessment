@@ -1,6 +1,5 @@
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import io.vavr.control.Try;
 
 import java.util.BitSet;
 import java.util.Optional;
@@ -23,18 +22,23 @@ public class PackageSpecification {
      * Delimiter patter for such expression:<br>
      * <code>81 : (1,53.38,€45) (2,88.62,€98)</code>
      */
-    private static final Pattern DELIMITER_PATTERN = Pattern.compile("[ :(),€]+");
+    private static final Pattern PRODUCT_DELIMITER_PATTERN = Pattern.compile("[(),€]+");
+    //strict product pattern - not use because it doesn't allow precised error messages
+    //public static final Pattern PRODUCT_PATTERN = Pattern.compile("\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\)");
+    //relaxed product pattern to allow more precise error messages of the components
+    public static final Pattern PRODUCT_PATTERN = Pattern.compile("\\([^,]+,[^,]+,€[^\\)]+\\)");
 
     // token names
-    private static final String MAX_WEIGHT = "max weight";
-    private static final String MAX_PRODUCTS = "max products";
-    private static final String PRODUCT_NUMBER = "product number";
-    private static final String PRODUCT_WEIGHT = "product weight";
-    private static final String PRODUCT_PRICE = "product price";
+    static final String MAX_WEIGHT = "max weight";
+    static final String MAX_PRODUCTS = "max products";
+    static final String PRODUCT_NUMBER = "product number";
+    static final String PRODUCT_WEIGHT = "product weight";
+    static final String PRODUCT_PRICE = "product price";
+    static final String PRODUCT_STRUCTURE = "product structure";
+    static final String COLON_DELIMITER = ": delimiter";
 
     // parsing fields
     private int lineNumber = 0;
-    private Scanner scanner;
 
     // package specification fields
     private Double maxWeight;
@@ -74,15 +78,19 @@ public class PackageSpecification {
     private void readTokens(String stringLine) throws PackageSpecificationParsingException {
         // use a scanner to split the line in valuable tokens ignoring the not needed delimiters
         // this approach actually allows a more relax format of the input line, by using only one type of delimiter
-        try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
-            this.scanner = scanner;
-            this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT);
+        try (Scanner scanner = new Scanner(stringLine)) {
+            this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT, scanner);
+            skipDelimiterOrElseThrow(":", COLON_DELIMITER, scanner);
             this.products = Sets.newHashSet();
+            // Raw product sample "81 : (1,53.38,€45) (2,88.62,€98)"
             while (scanner.hasNext()) {
-                int productNumber = getTokenValueOrElseThrow(scanner::nextInt, PRODUCT_NUMBER);
-                double productWeight = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_WEIGHT);
-                double productPrice = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_PRICE);
-                products.add(new Product(productNumber, productWeight, productPrice));
+                String rawProduct = getTokenValueOrElseThrow(() -> scanner.next(PRODUCT_PATTERN), PRODUCT_STRUCTURE, scanner);
+                try(Scanner productScanner = new Scanner(rawProduct).useDelimiter(PRODUCT_DELIMITER_PATTERN)) {
+                    int productNumber = getTokenValueOrElseThrow(productScanner::nextInt, PRODUCT_NUMBER, productScanner);
+                    double productWeight = getTokenValueOrElseThrow(productScanner::nextDouble, PRODUCT_WEIGHT, productScanner);
+                    double productPrice = getTokenValueOrElseThrow(productScanner::nextDouble, PRODUCT_PRICE, productScanner);
+                    products.add(new Product(productNumber, productWeight, productPrice));
+                }
             }
         }
     }
@@ -130,12 +138,20 @@ public class PackageSpecification {
         }
     }
 
-    private <T> T getTokenValueOrElseThrow(Supplier<T> supplier, String tokenName) {
-        return Try.ofSupplier(supplier).getOrElseThrow(
-            () -> new PackageSpecificationParsingException(
+    private void skipDelimiterOrElseThrow(String delimiter, String delimiterName, Scanner scanner) {
+        getTokenValueOrElseThrow(() -> scanner.next(delimiter), delimiterName, scanner);
+    }
+
+    private <T> T getTokenValueOrElseThrow(Supplier<T> supplier, String tokenName, Scanner scanner) {
+        try{
+            return supplier.get();
+        }catch(Exception e) {
+            throw new PackageSpecificationParsingException(
                 lineNumber,
                 tokenName,
-                scanner.hasNext() ? scanner.next() : "<EOL>"));
+                scanner.hasNextLine() ? scanner.nextLine() : "<EOL>",
+                e);
+        }
     }
 
     Double getMaxWeight() {
