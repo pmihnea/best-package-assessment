@@ -20,12 +20,14 @@ import java.util.stream.Stream;
  */
 public class PackageSpecification {
     /**
-     * Delimiter patter for such expression:<br>
+     * Line structure and delimiter patters for such expression:<br>
      * <code>81 : (1,53.38,€45) (2,88.62,€98)</code>
      */
     private static final Pattern DELIMITER_PATTERN = Pattern.compile("[ :(),€]+");
+    private static final Pattern LINE_FORMAT = Pattern.compile("^(\\d+(\\.\\d+)?)\\s*:(\\s+\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\))+$");
 
     // token names
+    private static final String LINE_STRUCTURE = "line structure";
     private static final String MAX_WEIGHT = "max weight";
     private static final String MAX_PRODUCTS = "max products";
     private static final String PRODUCT_NUMBER = "product number";
@@ -71,6 +73,13 @@ public class PackageSpecification {
      * @throws PackageSpecificationParsingException in case the tokens are not parsed correctly
      */
     private void readTokens(String stringLine) throws PackageSpecificationParsingException {
+
+        if(!LINE_FORMAT.matcher(stringLine).matches()){
+            throw new PackageSpecificationParsingException(
+                lineNumber,
+                LINE_STRUCTURE,
+                stringLine);
+        };
         // use a scanner to split the line in valuable tokens ignoring the not needed delimiters
         // this approach actually allows a more relax format of the input line, by using only one type of delimiter
         try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
