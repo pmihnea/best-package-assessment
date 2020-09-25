@@ -34,7 +34,6 @@ public class PackageSpecification {
 
     // parsing fields
     private int lineNumber = 0;
-    private Scanner scanner;
 
     // package specification fields
     private Double maxWeight;
@@ -75,13 +74,12 @@ public class PackageSpecification {
         // use a scanner to split the line in valuable tokens ignoring the not needed delimiters
         // this approach actually allows a more relax format of the input line, by using only one type of delimiter
         try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
-            this.scanner = scanner;
-            this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT);
+            this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT, scanner);
             this.products = Sets.newHashSet();
             while (scanner.hasNext()) {
-                int productNumber = getTokenValueOrElseThrow(scanner::nextInt, PRODUCT_NUMBER);
-                double productWeight = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_WEIGHT);
-                double productPrice = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_PRICE);
+                int productNumber = getTokenValueOrElseThrow(scanner::nextInt, PRODUCT_NUMBER, scanner);
+                double productWeight = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_WEIGHT, scanner);
+                double productPrice = getTokenValueOrElseThrow(scanner::nextDouble, PRODUCT_PRICE, scanner);
                 products.add(new Product(productNumber, productWeight, productPrice));
             }
         }
@@ -130,7 +128,7 @@ public class PackageSpecification {
         }
     }
 
-    private <T> T getTokenValueOrElseThrow(Supplier<T> supplier, String tokenName) {
+    private <T> T getTokenValueOrElseThrow(Supplier<T> supplier, String tokenName, Scanner scanner) {
         return Try.ofSupplier(supplier).getOrElseThrow(
             () -> new PackageSpecificationParsingException(
                 lineNumber,
