@@ -24,7 +24,7 @@ public class PackageSpecification {
      * <code>81 : (1,53.38,€45) (2,88.62,€98)</code>
      */
     private static final Pattern DELIMITER_PATTERN = Pattern.compile("[ :(),€]+");
-    private static final Pattern LINE_FORMAT = Pattern.compile("^(\\d+(\\.\\d+)?)\\s*:(\\s+\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\))+$");
+    private static final Pattern LINE_STRUCTURE_PATTERN = Pattern.compile("^(\\d+(\\.\\d+)?)\\s*:(\\s+\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\))+$");
 
     // token names
     private static final String LINE_STRUCTURE = "line structure";
@@ -74,7 +74,7 @@ public class PackageSpecification {
      */
     private void readTokens(String stringLine) throws PackageSpecificationParsingException {
 
-        if(!LINE_FORMAT.matcher(stringLine).matches()){
+        if(!LINE_STRUCTURE_PATTERN.matcher(stringLine).matches()){
             throw new PackageSpecificationParsingException(
                 lineNumber,
                 LINE_STRUCTURE,
