@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
  * </ul>
  * </ul>
  */
-public class FindBestPackage {
+public class FindBestPackageCommand {
     /**
      * Processes the input file line by line.
      *
@@ -48,8 +49,13 @@ public class FindBestPackage {
      */
     private static void processLine(String line, int lineNumber) {
         try {
-            PackageSpecification packageSpecification = new PackageSpecification(line, lineNumber);
-            System.out.println(new OutputLine(packageSpecification.findBestPackage()));
+            Optional<Package> optionalBestPackage =
+                new PackageSpecificationReader()
+                .andThen(new PackageSpecificationValidator())
+                .andThen(new BestPackageFinder().withFindBestPackageStrategy(BestPackageFinder.FindBestPackageStrategy.KNAPSACK))
+                .apply(new InputLine(lineNumber, line));
+
+            System.out.println(new OutputLine(optionalBestPackage));
         } catch (PackageSpecificationBaseException e) {
             System.out.println("-"); //no package could be found because of errors
             System.err.println("Line " + lineNumber + " cannot be processed because :" + System.lineSeparator() + e.getMessage());

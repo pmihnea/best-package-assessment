@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // Checks that no exceptions occur when executing the main program
-public class FindBestPackageTest {
+public class FindBestPackageCommandTest {
     private String getPath(URL url) {
         String path = url.getPath();
         if (SystemUtils.IS_OS_WINDOWS) {
@@ -50,7 +50,7 @@ public class FindBestPackageTest {
     public void testOk() {
         String path = getPath(getClass().getResource("sampleInput.txt"));
         String[] args = {path};
-        FindBestPackage.main(args);
+        FindBestPackageCommand.main(args);
         System.out.flush();
         Assertions.assertIterableEquals(List.of(
             "4",
@@ -80,22 +80,20 @@ public class FindBestPackageTest {
             .collect(Collectors.toList());
     }
 
-
     @Test
     public void testWithErrors() {
         String path = getPath(getClass().getResource("sampleInvalidInput.txt"));
         String[] args = {path};
-        FindBestPackage.main(args);
+        FindBestPackageCommand.main(args);
         Assertions.assertLinesMatch(List.of(">> other lines >>", "Invalid .*",
             ">> 7 >>"),
             testErrToList());
-
     }
 
     @Test
     public void testWithNoFile() {
         String[] args = {};
-        FindBestPackage.main(args);
+        FindBestPackageCommand.main(args);
         Assertions.assertLinesMatch(List.of("Invalid command arguments.*"),
             testErrToList());
 
@@ -104,7 +102,7 @@ public class FindBestPackageTest {
     @Test
     public void testWithNotExistingFile() {
         String[] args = {"not-existing-file.txt"};
-        FindBestPackage.main(args);
+        FindBestPackageCommand.main(args);
         Assertions.assertLinesMatch(List.of("java.nio.file.NoSuchFileException.*"),
             testErrToList());
     }
@@ -117,7 +115,7 @@ public class FindBestPackageTest {
             System.setOut(nullPrintStream);
             String path = getPath(getClass().getResource("sampleBigInput.txt"));
             String[] args = {path};
-            FindBestPackage.main(args);
+            FindBestPackageCommand.main(args);
         } finally {
             System.setOut(current);
         }
@@ -128,7 +126,7 @@ public class FindBestPackageTest {
     private static PrintStream createNullPrintStream() {
         return new PrintStream(new OutputStream() {
             @Override
-            public void write(int b) throws IOException {
+            public void write(int b) {
                 //
             }
         });

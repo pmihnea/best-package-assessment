@@ -8,6 +8,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Builds a stream of combinations of n elements excluding the cases that fail a given predicate.
+ */
 public class CombinationsStream {
     private final int n;
     private final BiFunction<BitSet, Integer, Boolean> canExtendCombination;
