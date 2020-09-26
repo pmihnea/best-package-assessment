@@ -24,18 +24,24 @@ public class PackageSpecification {
      * <code>81 : (1,53.38,€45) (2,88.62,€98)</code>
      */
     private static final Pattern DELIMITER_PATTERN = Pattern.compile("[ :(),€]+");
-    private static final Pattern LINE_STRUCTURE_PATTERN = Pattern.compile("^(\\d+(\\.\\d+)?) +:( +\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\))+$");
+    // private static final Pattern LINE_STRUCTURE_PATTERN = Pattern.compile("^(\\d+(\\.\\d+)?) +:( +\\(\\d+,\\d+(\\.\\d+)?,€\\d+(\\.\\d+)?\\))+$");
+    // Use a relaxed pattern that only checks the structure of the line given by the delimiters but not the values themselves
+    // that are checked later to be able to give a precise error on them.
+    // The regular expression check only gives a yes/no match response.
+    private static final Pattern LINE_STRUCTURE_PATTERN_RELAXED =
+        Pattern.compile("^([^ :(),€]+) +:( +\\(([^ :(),€]+),([^ :(),€]+),€([^ :(),€]+)\\))+$");
+
 
     // token names
-    private static final String LINE_STRUCTURE = "line structure";
-    private static final String MAX_WEIGHT = "max weight";
-    private static final String MAX_PRODUCTS = "max products";
-    private static final String PRODUCT_NUMBER = "product number";
-    private static final String PRODUCT_WEIGHT = "product weight";
-    private static final String PRODUCT_PRICE = "product price";
+    static final String LINE_STRUCTURE = "line structure";
+    static final String MAX_WEIGHT = "max weight";
+    static final String MAX_PRODUCTS = "max products";
+    static final String PRODUCT_NUMBER = "product number";
+    static final String PRODUCT_WEIGHT = "product weight";
+    static final String PRODUCT_PRICE = "product price";
 
-    // parsing fields
-    private int lineNumber = 0;
+    // line identification
+    private final int lineNumber;
 
     // package specification fields
     private Double maxWeight;
@@ -45,6 +51,7 @@ public class PackageSpecification {
     PackageSpecification(Double maxWeight, Set<Product> products) throws PackageSpecificationValidationException {
         this.maxWeight = maxWeight;
         this.products = products;
+        this.lineNumber = 1;
         validateTokens();
     }
 
@@ -74,14 +81,15 @@ public class PackageSpecification {
      */
     private void readTokens(String stringLine) throws PackageSpecificationParsingException {
 
-        if(!LINE_STRUCTURE_PATTERN.matcher(stringLine).matches()){
+        // check first the line structure
+        if (!LINE_STRUCTURE_PATTERN_RELAXED.matcher(stringLine).matches()) {
             throw new PackageSpecificationParsingException(
                 lineNumber,
                 LINE_STRUCTURE,
                 stringLine);
-        };
-        // use a scanner to split the line in valuable tokens ignoring the not needed delimiters
-        // this approach actually allows a more relax format of the input line, by using only one type of delimiter
+        }
+        ;
+        // use a scanner to split the line in valuable tokens ignoring the delimiters that were check upfront
         try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
             this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT, scanner);
             this.products = Sets.newHashSet();
