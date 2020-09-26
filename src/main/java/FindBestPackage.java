@@ -49,6 +49,7 @@ public class FindBestPackage {
     private static void processLine(String line, int lineNumber) {
         try {
             PackageSpecification packageSpecification = new PackageSpecification(line, lineNumber);
+            packageSpecification.setFindBestPackageStrategy(PackageSpecification.FindBestPackageStrategy.KNAPSACK);
             System.out.println(new OutputLine(packageSpecification.findBestPackage()));
         } catch (PackageSpecificationBaseException e) {
             System.out.println("-"); //no package could be found because of errors
