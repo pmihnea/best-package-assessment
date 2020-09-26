@@ -44,11 +44,11 @@ public class PackageSpecification {
     private final int lineNumber;
 
     // package specification fields
-    private Double maxWeight;
+    private double maxWeight;
     private Set<Product> products;
 
     // constructor used for testing
-    PackageSpecification(Double maxWeight, Set<Product> products) throws PackageSpecificationValidationException {
+    PackageSpecification(double maxWeight, Set<Product> products) throws PackageSpecificationValidationException {
         this.maxWeight = maxWeight;
         this.products = products;
         this.lineNumber = 1;
@@ -56,7 +56,7 @@ public class PackageSpecification {
     }
 
     // constructor used for testing
-    PackageSpecification(Double maxWeight, Product... products) throws PackageSpecificationValidationException {
+    PackageSpecification(double maxWeight, Product... products) throws PackageSpecificationValidationException {
         this(maxWeight, Sets.newHashSet(products));
     }
 
@@ -153,7 +153,7 @@ public class PackageSpecification {
                 scanner.hasNext() ? scanner.next() : "<EOL>"));
     }
 
-    Double getMaxWeight() {
+    double getMaxWeight() {
         return maxWeight;
     }
 
@@ -219,9 +219,9 @@ public class PackageSpecification {
         // if that would exceed the max package weight
         CombinationsStream combinationsStream = new CombinationsStream(productsArray.length,
             (bitSet, i) -> {
-                Double productsTotalWeight = bitSet.stream()
+                double productsTotalWeight = bitSet.stream()
                     .mapToObj(index -> productsArray[index])
-                    .map(Product::getWeight)
+                    .mapToDouble(Product::getWeight)
                     .reduce(Double::sum)
                     .orElse(0.0);
                 return productsTotalWeight + productsArray[i].getWeight() <= maxWeight;

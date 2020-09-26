@@ -26,16 +26,16 @@ public class Package {
         this.products = products;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return products.stream()
-            .map(Product::getPrice)
+            .mapToDouble(Product::getPrice)
             .reduce(Double::sum)
             .orElse(0.0);
     }
 
-    public Double getWeight() {
+    public double getWeight() {
         return products.stream()
-            .map(Product::getWeight)
+            .mapToDouble(Product::getWeight)
             .reduce(Double::sum)
             .orElse(0.0);
     }
