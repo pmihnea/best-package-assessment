@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackageSpecificationTest {
     @Test
-    public void testValidInputLine(){
+    public void testValidInputLine() {
         PackageSpecification packageSpecification = new PackageSpecification("81 : (1,53.38,€45) (2,88.62,€98)", 1);
         assertEquals(81.0, packageSpecification.getMaxWeight());
         Set<Product> expectedProducts = Sets.newHashSet(
@@ -24,53 +24,118 @@ public class PackageSpecificationTest {
     }
 
     @Test
-    public  void testWrongMaxWeight(){
-        assertThrows(PackageSpecificationParsingException.class,
-            () -> new PackageSpecification("XXX : ", 1)
+    public void testWrongDelimiters1() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 , (1,53.38,€45)", 1)
         );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @Test
-    public  void testWrongProductNumber(){
-        assertThrows(PackageSpecificationParsingException.class,
+    public void testWrongDelimiters2() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 : ,1,53.38,€45)", 1)
+        );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongDelimiters3() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 : (1(53.38,€45)", 1)
+        );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongDelimiters4() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 : (1,53.38(€45)", 1)
+        );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongDelimiters5() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 : (1,53.38,(45)", 1)
+        );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongDelimiters6() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("81 : (1,53.38,€45X", 1)
+        );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongMaxWeight() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
+            () -> new PackageSpecification("XXX : (1,53.38,€45)", 1)
+        );
+        assertEquals(PackageSpecification.MAX_WEIGHT, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
+    }
+
+    @Test
+    public void testWrongProductNumber() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
             () -> new PackageSpecification("81 : (XXX,53.38,€45)", 1)
         );
+        assertEquals(PackageSpecification.PRODUCT_NUMBER, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @Test
-    public  void testWrongProductWeight(){
-        assertThrows(PackageSpecificationParsingException.class,
+    public void testWrongProductWeight() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
             () -> new PackageSpecification("81 : (1,XXX,€45)", 1)
         );
+        assertEquals(PackageSpecification.PRODUCT_WEIGHT, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @Test
-    public  void testWrongProductPrice(){
-        assertThrows(PackageSpecificationParsingException.class,
+    public void testWrongProductPrice() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
             () -> new PackageSpecification("81 : (1,53.38,€XXX)", 1)
         );
+        assertEquals(PackageSpecification.PRODUCT_PRICE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @Test
-    public  void testMissingProductPrice(){
-        assertThrows(PackageSpecificationParsingException.class,
+    public void testMissingProductPrice() {
+        PackageSpecificationParsingException ex = assertThrows(PackageSpecificationParsingException.class,
             () -> new PackageSpecification("81 : (1,53.38,€)", 1)
         );
+        assertEquals(PackageSpecification.LINE_STRUCTURE, ex.getTokenName());
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @Test
-    public  void testInvalidInputLine(){
-        assertThrows(PackageSpecificationValidationException.class,
+    public void testInvalidInputLine() {
+        PackageSpecificationValidationException ex = assertThrows(PackageSpecificationValidationException.class,
             () -> {
-                String inputLine = IntStream.rangeClosed(1,16).mapToObj(value -> " ("+value+",101.0,€101.0)").reduce("101.0 :", (s, s2) -> s + s2);
+                String inputLine = IntStream.rangeClosed(1, 16).mapToObj(value -> " (" + value + ",101.0,€101.0)").reduce("101.0 :", (s, s2) -> s + s2);
                 new PackageSpecification(inputLine, 1);
             }
         );
+        // System.out.println(ex.getMessage() + " Cause: " + ex.getCause());
     }
 
     @ParameterizedTest
     @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
-    public  void testFindPackage1(PackageSpecification.FindBestPackageStrategy strategy){
+    public void testFindPackage1(PackageSpecification.FindBestPackageStrategy strategy) {
         PackageSpecification packageSpecification = new PackageSpecification(81.0,
             new Product(1, 53.38, 45.0),
             new Product(2, 88.62, 98.0),
@@ -90,7 +155,7 @@ public class PackageSpecificationTest {
 
     @ParameterizedTest
     @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
-    public  void testFindPackage2(PackageSpecification.FindBestPackageStrategy strategy){
+    public void testFindPackage2(PackageSpecification.FindBestPackageStrategy strategy) {
         PackageSpecification packageSpecification = new PackageSpecification(8.0,
             new Product(1, 15.3, 34.0)
         );
@@ -103,7 +168,7 @@ public class PackageSpecificationTest {
 
     @ParameterizedTest
     @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
-    public  void testFindPackage3(PackageSpecification.FindBestPackageStrategy strategy){
+    public void testFindPackage3(PackageSpecification.FindBestPackageStrategy strategy) {
         PackageSpecification packageSpecification = new PackageSpecification(75.0,
             new Product(1, 85.31, 29.0),
             new Product(2, 14.55, 74.0),
@@ -127,7 +192,7 @@ public class PackageSpecificationTest {
 
     @ParameterizedTest
     @EnumSource(PackageSpecification.FindBestPackageStrategy.class)
-    public  void testFindPackage4(PackageSpecification.FindBestPackageStrategy strategy){
+    public void testFindPackage4(PackageSpecification.FindBestPackageStrategy strategy) {
         PackageSpecification packageSpecification = new PackageSpecification(56.0,
             new Product(1, 90.72, 13.0),
             new Product(2, 33.80, 40.0),
