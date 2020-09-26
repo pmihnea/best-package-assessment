@@ -1,12 +1,12 @@
 package com.pmihnea.bestpackage;
 
 import com.google.common.collect.Sets;
-import io.vavr.control.Try;
 
 import java.util.Scanner;
 import java.util.Set;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
 import java.util.regex.Pattern;
 
 /**
@@ -35,7 +35,7 @@ public class PackageSpecificationReader implements Function<InputLine, RawPackag
         String stringLine = inputLine.getStringLine();
 
         // package specification fields
-        Double maxWeight;
+        double maxWeight;
         Set<Product> products;
 
         // check first the line structure
@@ -47,12 +47,12 @@ public class PackageSpecificationReader implements Function<InputLine, RawPackag
         }
         // use a scanner to split the line in valuable tokens ignoring the delimiters that were check upfront
         try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
-            maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.MAX_WEIGHT, scanner, lineNumber);
+            maxWeight = getDoubleTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.MAX_WEIGHT, scanner, lineNumber);
             products = Sets.newHashSet();
             while (scanner.hasNext()) {
-                int productNumber = getTokenValueOrElseThrow(scanner::nextInt, InputLineTokens.PRODUCT_NUMBER, scanner, lineNumber);
-                double productWeight = getTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.PRODUCT_WEIGHT, scanner, lineNumber);
-                double productPrice = getTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.PRODUCT_PRICE, scanner, lineNumber);
+                int productNumber = getIntTokenValueOrElseThrow(scanner::nextInt, InputLineTokens.PRODUCT_NUMBER, scanner, lineNumber);
+                double productWeight = getDoubleTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.PRODUCT_WEIGHT, scanner, lineNumber);
+                double productPrice = getDoubleTokenValueOrElseThrow(scanner::nextDouble, InputLineTokens.PRODUCT_PRICE, scanner, lineNumber);
                 products.add(new Product(productNumber, productWeight, productPrice));
             }
         }
@@ -60,12 +60,27 @@ public class PackageSpecificationReader implements Function<InputLine, RawPackag
         return new RawPackageSpecification(lineNumber, maxWeight, products);
     }
 
-    private <T> T getTokenValueOrElseThrow(Supplier<T> supplier, String tokenName, Scanner scanner, int lineNumber) {
-        return Try.ofSupplier(supplier).getOrElseThrow(
-            () -> new PackageSpecificationParsingException(
-                lineNumber,
-                tokenName,
-                scanner.hasNext() ? scanner.next() : "<EOL>"));
+    private double getDoubleTokenValueOrElseThrow(DoubleSupplier supplier, String tokenName, Scanner scanner, int lineNumber) {
+        try{
+            return supplier.getAsDouble();
+        }catch (Exception x){
+            throw newPackageSpecificationParsingException(tokenName, scanner, lineNumber);
+        }
+    }
+
+    private int getIntTokenValueOrElseThrow(IntSupplier supplier, String tokenName, Scanner scanner, int lineNumber) {
+        try{
+            return supplier.getAsInt();
+        }catch (Exception x){
+            throw newPackageSpecificationParsingException(tokenName, scanner, lineNumber);
+        }
+    }
+
+    private PackageSpecificationParsingException newPackageSpecificationParsingException(String tokenName, Scanner scanner, int lineNumber) {
+        return new PackageSpecificationParsingException(
+            lineNumber,
+            tokenName,
+            scanner.hasNext() ? scanner.next() : "<EOL>");
     }
 
     @Override

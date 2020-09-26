@@ -21,9 +21,9 @@ public class OptimizedBestPackageFinder implements PackageFinder {
         // if that would exceed the max package weight
         CombinationsStream combinationsStream = new CombinationsStream(productsArray.length,
             (bitSet, i) -> {
-                Double productsTotalWeight = bitSet.stream()
+                double productsTotalWeight = bitSet.stream()
                     .mapToObj(index -> productsArray[index])
-                    .map(Product::getWeight)
+                    .mapToDouble(Product::getWeight)
                     .reduce(Double::sum)
                     .orElse(0.0);
                 return productsTotalWeight + productsArray[i].getWeight() <= packageSpecification.getMaxWeight();
