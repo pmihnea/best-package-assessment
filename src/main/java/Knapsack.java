@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  * Classical Knapsack algorithm implementation using a recursive approach with cached values.
  */
 public class Knapsack {
-    private static Logger LOG = Logger.getLogger("Knapsack");
+    private static final Logger LOG = Logger.getLogger("Knapsack");
     private final Product[] products;
 
     public Knapsack(Product[] products) {
@@ -27,8 +27,8 @@ public class Knapsack {
     }
 
     private static class Key {
-        private double maxWeight;
-        private int start;
+        private final double maxWeight;
+        private final int start;
 
         public Key(double maxWeight, int start) {
             this.maxWeight = maxWeight;
@@ -67,9 +67,9 @@ public class Knapsack {
     }
 
     private static class Value {
-        private double weight;
-        private double price;
-        private BitSet indexes;
+        private final double weight;
+        private final double price;
+        private final BitSet indexes;
 
         public Value(int length) {
             this.weight = 0;
@@ -89,7 +89,7 @@ public class Knapsack {
             return new Value(this.weight + weight, this.price + price, newIndexes);
         }
 
-        private static Comparator<Value> BEST_COMPARATOR =
+        private static final Comparator<Value> BEST_COMPARATOR =
             // compare first by price
             Comparator.comparingDouble(Value::getPrice)
                 .thenComparing(
@@ -131,7 +131,7 @@ public class Knapsack {
         }
     }
 
-    private Map<Key,Value> cache = Maps.newHashMap();
+    private final Map<Key,Value> cache = Maps.newHashMap();
     private Value findMaxCached(Key key) {
         if(cache.containsKey(key)){
             return cache.get(key);

@@ -60,7 +60,7 @@ public class CombinationsStream {
 
     private Stream<BitSet> combinationsStreamIterative() {
         Iterator<BitSet> iterator = new Iterator<>() {
-            BitSet combination = new BitSet(n);
+            final BitSet combination = new BitSet(n);
             Integer last = -1;
             BitSet next = new BitSet(n); // empty combination
 

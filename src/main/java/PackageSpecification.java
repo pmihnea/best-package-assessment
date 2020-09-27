@@ -88,7 +88,6 @@ public class PackageSpecification {
                 LINE_STRUCTURE,
                 stringLine);
         }
-        ;
         // use a scanner to split the line in valuable tokens ignoring the delimiters that were check upfront
         try (Scanner scanner = new Scanner(stringLine).useDelimiter(DELIMITER_PATTERN)) {
             this.maxWeight = getTokenValueOrElseThrow(scanner::nextDouble, MAX_WEIGHT, scanner);
