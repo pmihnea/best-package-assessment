@@ -20,6 +20,8 @@ public class KnapsackTest {
         String result = max.stream().map(index -> products[index].getNumber()).sorted().mapToObj(Objects::toString).collect(Collectors.joining(","));
         Assertions.assertEquals("2,3", result);
     }
+
+    @SuppressWarnings("ConstantConditions")
     @Test
     public void testFindMaxEmptyProducts(){
         Product[] products = {};
