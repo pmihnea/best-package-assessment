@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 /**
  * The class reads an input text file where each row contains a package specification and
  * computes for each row the best package in terms of maximum total price and minimum total weight in case of the same total price.
- * See the README.md for the complete requirements.<br>
+ * See the README.md for the complete requirements.<br> 
  * The main processing steps are: <ul>
  * <li>it reads the file line by line
  * <li>for each line <ul>
